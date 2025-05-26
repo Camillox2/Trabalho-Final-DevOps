@@ -1,0 +1,13 @@
+RewriteEngine On
+
+# Se o request não for para um arquivo existente
+
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# E se o request não for para um diretório existente
+
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Redireciona o request para index.php
+
+RewriteRule ^ index.php [L]
