@@ -3,7 +3,7 @@ const messageRouter = express.Router();
 const { createMessage, getMessages } = require("../services/messageService");
 const { authenticateToken } = require("../middlewares/authMiddleware");
 
-messageRouter.post("/", authenticateToken, createMessage);
-messageRouter.get("/", authenticateToken, getMessages);
+messageRouter.post("/", createMessage);
+messageRouter.get("/", getMessages);
 
 module.exports = messageRouter;
