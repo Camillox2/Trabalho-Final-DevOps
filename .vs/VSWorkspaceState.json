@@ -1,0 +1,10 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\auth-api",
+    "\\receive-send-api",
+    "\\record-api"
+  ],
+  "SelectedNode": "\\record-api\\dockerfile",
+  "PreviewInSolutionExplorer": false
+}

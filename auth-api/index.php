@@ -94,7 +94,7 @@ switch ($path_info) {
     case '/auth/validate':
         if ($request_method == 'GET') {
             $headers = getallheaders();
-            $auth_header = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($headers['authorization']) ? $headers['authorization'] : null);
+            $auth_header = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($headers['Authorization']) ? $headers['Authorization'] : null);
 
             if ($auth_header) {
                 list($type, $token) = explode(' ', $auth_header, 2);
