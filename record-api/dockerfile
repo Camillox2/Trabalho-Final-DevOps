@@ -8,8 +8,8 @@ COPY ./requirements.txt /app/
 
 RUN pip install --no-cache-dir --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --trusted-host pypi.org -r requirements.txt
 
-COPY ./src/ /app/
+COPY ./src/ /app/src
 
 EXPOSE 5001
 
-CMD ["python", "record_api_service.py"]
+CMD ["python", "src/record_api_service.py"]

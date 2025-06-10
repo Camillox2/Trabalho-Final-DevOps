@@ -17,9 +17,9 @@ def get_db_connection(attempt_count=0):
     db_pass_env = os.getenv('POSTGRES_PASSWORD')
     db_port = os.getenv('DB_PORT', '5432')
 
-    db_name = db_name_env if db_name_env is not None else 'chat_application_db' 
-    db_user = db_user_env if db_user_env is not None else 'admin_user'         
-    db_pass = db_pass_env if db_pass_env is not None else 'supersecretpassword' 
+    db_name = db_name_env if db_name_env is not None else 'chat_application_db'
+    db_user = db_user_env if db_user_env is not None else 'admin_user'
+    db_pass = db_pass_env if db_pass_env is not None else 'supersecretpassword'
     
     try:
         conn = psycopg2.connect(
@@ -28,7 +28,7 @@ def get_db_connection(attempt_count=0):
             user=db_user,
             password=db_pass,
             port=db_port,
-            connect_timeout=5 
+            connect_timeout=5
         )
         logger.info(f"Conexão com PostgreSQL ({db_host}:{db_port}/{db_name}) como usuário '{db_user}' estabelecida com sucesso.")
         return conn
@@ -38,7 +38,7 @@ def get_db_connection(attempt_count=0):
 
 def init_db():
     max_retries = 5
-    retry_delay = 5 
+    retry_delay = 5
     conn = None
     for i in range(max_retries):
         conn = get_db_connection(attempt_count=i)
@@ -83,7 +83,7 @@ def record_message():
     conn = get_db_connection()
     if not conn:
         logger.error("POST /messages: Falha na conexão com o banco de dados.")
-        return jsonify({'error': 'Falha na conexão com o banco de dados ao gravar msg'}), 503 
+        return jsonify({'error': 'Falha na conexão com o banco de dados ao gravar msg'}), 503
 
     try:
         with conn.cursor() as cur:

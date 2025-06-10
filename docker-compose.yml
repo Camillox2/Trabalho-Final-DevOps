@@ -9,9 +9,9 @@ services:
     environment:
       DB_HOST: postgres_db
       DB_PORT: 5432
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
     depends_on:
       postgres_db:
         condition: service_healthy
@@ -59,12 +59,12 @@ services:
     networks:
       - chat_network
     environment:
-      AUTH_API_URL: http://auth-api
+      AUTH_API_URL: http://auth-api:80
       RECORD_API_URL: http://record-api:5001
       REDIS_HOST: redis_cache
       REDIS_PORT: 6379
       DB_HOST: postgres_db # Usado se o Node se conectar diretamente
-      DB_PORT: 5432      # Usado se o Node se conectar diretamente
+      DB_PORT: 5432 # Usado se o Node se conectar diretamente
       POSTGRES_DB: ${POSTGRES_DB} # Para consistência e se o Node precisar
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -97,7 +97,11 @@ services:
     networks:
       - chat_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-admin_user} -d $${POSTGRES_DB:-chat_application_db} -q"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:-admin_user} -d $${POSTGRES_DB:-chat_application_db} -q",
+        ]
       interval: 5s
       timeout: 5s
       retries: 10
