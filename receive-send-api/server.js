@@ -8,10 +8,10 @@ const authController = require('./controllers/authController');
 const healthController = require('./controllers/healthController');
 
 app.use('/messages', messageController);
-app.use('/', authController);
-app.use('/', healthController);
+app.use(authController);
+app.use('/health', healthController);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3002;
 
 app.listen(PORT, () => {
   console.log(`Receive-Send-API rodando na porta ${PORT}`);

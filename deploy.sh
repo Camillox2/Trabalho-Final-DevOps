@@ -27,21 +27,21 @@ docker-compose logs --tail="10" redis_cache
 
 echo "Executando testes de saúde básicos..."
 
-AUTH_API_HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health)
+AUTH_API_HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3001/health)
 if [ "$AUTH_API_HTTP_CODE" = "200" ]; then
     echo "Auth-API está respondendo (HTTP 200)."
 else
     echo "Auth-API não está respondendo corretamente (HTTP $AUTH_API_HTTP_CODE)."
 fi
 
-RECORD_API_HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5001/health)
+RECORD_API_HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5002/health)
 if [ "$RECORD_API_HTTP_CODE" = "200" ]; then
     echo "Record-API está respondendo (HTTP 200)."
 else
     echo "Record-API não está respondendo corretamente (HTTP $RECORD_API_HTTP_CODE)."
 fi
 
-RECEIVE_SEND_API_HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/health)
+RECEIVE_SEND_API_HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3002/health)
 if [ "$RECEIVE_SEND_API_HTTP_CODE" = "200" ]; then
     echo "Receive-Send-API está respondendo (HTTP 200)."
 else
@@ -56,9 +56,9 @@ fi
 
 echo "Processo de deploy concluído."
 echo "Serviços disponíveis em:"
-echo "   Auth-API: http://localhost:8080"
-echo "   Record-API: http://localhost:5001"
-echo "   Receive-Send-API: http://localhost:3000"
+echo "   Auth-API: http://localhost:3001"
+echo "   Record-API: http://localhost:5002"
+echo "   Receive-Send-API: http://localhost:3002"
 echo "   PostgreSQL: localhost:5432 (interno: postgres_db:5432)"
 echo "   Redis: localhost:6379 (interno: redis_cache:6379)"
 
