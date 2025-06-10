@@ -1,18 +1,15 @@
 const express = require('express');
-const { connectRabbitMQ } = require('./utils/rabbitmq');
 
 const app = express();
+app.use(express.json());
 
 const messageController = require('./controller/messageController');
-
-app.use(express.json());
-connectRabbitMQ();
+const authController = require('./controller/authController');
+const healthController = require('./controller/healthController');
 
 app.use('/message', messageController);
-
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
-});
+app.use('/', authController);
+app.use('/', healthController);
 
 const PORT = process.env.PORT || 3000;
 
