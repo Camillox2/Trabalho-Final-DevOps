@@ -3,7 +3,7 @@ services:
     build: ./auth-api
     container_name: auth_api_service
     ports:
-      - "8080:80"
+      - "3001:3000"
     networks:
       - chat_network
     environment:
@@ -17,7 +17,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -27,7 +27,7 @@ services:
     build: ./record-api
     container_name: record_api_service
     ports:
-      - "5001:5001"
+      - "5002:5002"
     networks:
       - chat_network
     environment:
@@ -45,7 +45,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -55,12 +55,12 @@ services:
     build: ./receive-send-api
     container_name: receive_send_api_service
     ports:
-      - "3000:3000"
+      - "3002:3002"
     networks:
       - chat_network
     environment:
-      AUTH_API_URL: http://auth-api:80
-      RECORD_API_URL: http://record-api:5001
+      AUTH_API_URL: http://auth-api:3001
+      RECORD_API_URL: http://record-api:5002
       REDIS_HOST: redis_cache
       REDIS_PORT: 6379
       DB_HOST: postgres_db # Usado se o Node se conectar diretamente

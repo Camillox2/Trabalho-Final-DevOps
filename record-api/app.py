@@ -181,5 +181,5 @@ def health_check():
 if __name__ == '__main__':
     logger.info("Iniciando Record-API...")
     init_db()
-    app.run(host='0.0.0.0', port=5001, debug=False) 
+    app.run(host='0.0.0.0', port=5002, debug=False) 
     logger.info("Record-API encerrada.")

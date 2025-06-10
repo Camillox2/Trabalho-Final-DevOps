@@ -1,7 +1,7 @@
 require('dotenv').config();
 const axios = require("axios");
 
-const AUTH_API_URL = process.env.AUTH_API_URL || "http://auth-api";
+const AUTH_API_URL = process.env.AUTH_API_URL || "http://auth-api:3000";
 
 async function login(req, res) {
   try {

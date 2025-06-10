@@ -2,8 +2,8 @@ require('dotenv').config();
 const axios = require("axios");
 const redisClient = require('../utils/redisClient');
 
-const AUTH_API_URL = process.env.AUTH_API_URL || "http://auth-api";
-const RECORD_API_URL = process.env.RECORD_API_URL || "http://record-api:5001";
+const AUTH_API_URL = process.env.AUTH_API_URL || "http://auth-api:3000";
+const RECORD_API_URL = process.env.RECORD_API_URL || "http://record-api:5002";
 
 async function health(req, res) {
   let authApiHealthy = false;
