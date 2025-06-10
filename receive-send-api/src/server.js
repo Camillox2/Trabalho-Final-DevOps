@@ -3,11 +3,11 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
-const messageController = require('./controller/messageController');
-const authController = require('./controller/authController');
-const healthController = require('./controller/healthController');
+const messageController = require('./controllers/messageController');
+const authController = require('./controllers/authController');
+const healthController = require('./controllers/healthController');
 
-app.use('/message', messageController);
+app.use('/messages', messageController);
 app.use('/', authController);
 app.use('/', healthController);
 

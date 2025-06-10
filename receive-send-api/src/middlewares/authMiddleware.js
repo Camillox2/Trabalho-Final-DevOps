@@ -38,4 +38,4 @@ async function authenticateToken(req, res, next) {
   }
 }
 
-exports.module = { authenticateToken };
+module.exports = { authenticateToken };

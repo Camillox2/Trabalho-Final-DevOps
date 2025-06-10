@@ -3,6 +3,8 @@
 **Aluno:** Vitor Henrique Camillo
 **Aluno:** Hiro Alessandro Terato
 **Aluno:** Erick Borges
+**Aluno:** Jorge Willian Paez Nagakura
+**Aluno:** Tiago Gadonski Cordeiro
 
 ## 1. Introdução e Objetivo
 

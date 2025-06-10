@@ -11,16 +11,16 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo "Subindo os contêineres com Docker Compose..."
+echo "Subindo os containers com Docker Compose..."
 docker-compose up -d
 if [ $? -ne 0 ]; then
-    echo "AVISO: Docker Compose reportou um erro ao subir os contêineres (um ou mais podem não estar saudáveis)."
+    echo "AVISO: Docker Compose reportou um erro ao subir os containers (um ou mais podem não estar saudáveis)."
 fi
 
 echo "Aguardando os serviços iniciarem (tempo extra para healthchecks)..."
 sleep 30 
 
-echo "Logs dos contêineres:"
+echo "Logs dos containers:"
 docker-compose logs --tail="20" auth-api
 docker-compose logs --tail="20" record-api
 docker-compose logs --tail="20" receive-send-api
@@ -74,7 +74,7 @@ echo "Para parar os serviços, execute: docker-compose down"
 echo "Para ver logs em tempo real: docker-compose logs -f"
 
 echo "-----------------------------------------------------"
-echo "Verificando status detalhado dos contêineres:"
+echo "Verificando status detalhado dos containers:"
 docker-compose ps
 
 echo "-----------------------------------------------------"
