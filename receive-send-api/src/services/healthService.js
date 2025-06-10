@@ -1,4 +1,5 @@
 require('dotenv').config();
+const axios = require("axios");
 const redisClient = require('../utils/redisClient');
 
 const AUTH_API_URL = process.env.AUTH_API_URL || "http://auth-api";
