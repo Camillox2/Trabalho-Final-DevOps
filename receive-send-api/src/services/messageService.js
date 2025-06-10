@@ -1,4 +1,8 @@
+require('dotenv').config();
 const axios = require("axios");
+const redisClient = require('../utils/redisClient');
+
+const RECORD_API_URL = process.env.RECORD_API_URL || "http://record-api:5001";
 
 async function createMessage(req, res) {
   const { receiver_id, content } = req.body;

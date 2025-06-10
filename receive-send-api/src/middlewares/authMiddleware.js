@@ -1,3 +1,5 @@
+const AUTH_API_URL = process.env.AUTH_API_URL || "http://auth-api";
+
 async function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
