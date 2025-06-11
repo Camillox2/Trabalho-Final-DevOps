@@ -4,7 +4,7 @@ const axios = require("axios");
 const AUTH_API_URL = process.env.AUTH_API_URL || "http://auth-api:3000";
 
 async function authenticateToken(req, res, next) {
-  const authHeader = req.headers["Authorization"];
+  const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
   if (token == null)

@@ -21,12 +21,12 @@ echo "Login realizado e o token foi gerado: $TOKEN"
 
 echo ""
 echo "Teste 3: Enviando mensagem do usuario 1 para o usuario 2"
-curl -s -X POST http://localhost:3002/messages \
+curl -s -X POST http://localhost:3002/message \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN" \
-  -d '{ "sender_id": 1,"receiver_id": 2,"content": "Ola, usuario 2! Como vai?" }'
+  -H "authorization: Bearer $TOKEN" \
+  -d '{ "userIdSend": 1,"userIdReceive": 2,"message": "Ola, usuario 2! Como vai?" }'
 
 echo ""
 echo "Teste 4: Consulta de mensagens do usuario 1"
-curl -s -X GET "http://localhost:3002/messages?user=1" \
-  -H "Authorization: Bearer $TOKEN"
+curl -s -X GET "http://localhost:3002/message?user=1" \
+  -H "authorization: Bearer $TOKEN"

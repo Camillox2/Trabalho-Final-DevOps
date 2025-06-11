@@ -7,7 +7,7 @@ const messageController = require('./controllers/messageController');
 const authController = require('./controllers/authController');
 const healthController = require('./controllers/healthController');
 
-app.use('/messages', messageController);
+app.use('/message', messageController);
 app.use(authController);
 app.use('/health', healthController);
 

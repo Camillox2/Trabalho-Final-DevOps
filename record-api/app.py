@@ -58,7 +58,7 @@ def init_db():
                     id SERIAL PRIMARY KEY,
                     sender_id INTEGER NOT NULL,
                     receiver_id INTEGER,
-                    content TEXT NOT NULL,
+                    message TEXT NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
@@ -70,29 +70,29 @@ def init_db():
         if conn:
             conn.close()
 
-@app.route('/messages', methods=['POST'])
+@app.route('/message', methods=['POST'])
 def record_message():
     data = request.get_json()
-    if not data or not all(k in data for k in ('sender_id', 'content')):
-        return jsonify({'error': 'Dados incompletos. sender_id e content são obrigatórios.'}), 400
+    if not data or not all(k in data for k in ('sender_id', 'message')):
+        return jsonify({'error': 'Dados incompletos. sender_id e message são obrigatórios.'}), 400
 
     sender_id = data.get('sender_id')
     receiver_id = data.get('receiver_id')
-    content = data.get('content')
+    message = data.get('message')
 
     conn = get_db_connection()
     if not conn:
-        logger.error("POST /messages: Falha na conexão com o banco de dados.")
+        logger.error("POST /message: Falha na conexão com o banco de dados.")
         return jsonify({'error': 'Falha na conexão com o banco de dados ao gravar msg'}), 503
 
     try:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO messages (sender_id, receiver_id, content)
+                INSERT INTO messages (sender_id, receiver_id, message)
                 VALUES (%s, %s, %s) RETURNING id;
                 """,
-                (sender_id, receiver_id, content)
+                (sender_id, receiver_id, message)
             )
             message_id = cur.fetchone()[0]
             conn.commit()
@@ -105,7 +105,7 @@ def record_message():
         if conn:
             conn.close()
 
-@app.route('/messages', methods=['GET'])
+@app.route('/message', methods=['GET'])
 def get_messages():
     user_id = request.args.get('userId', type=int)
     if not user_id:
@@ -113,7 +113,7 @@ def get_messages():
 
     conn = get_db_connection()
     if not conn:
-        logger.error("GET /messages: Falha na conexão com o banco de dados.")
+        logger.error("GET /message: Falha na conexão com o banco de dados.")
         return jsonify({'error': 'Falha na conexão com o banco de dados ao buscar msgs'}), 503
 
     try:

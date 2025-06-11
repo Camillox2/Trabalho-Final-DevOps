@@ -5,29 +5,29 @@ const redisClient = require('../utils/redisClient');
 const RECORD_API_URL = process.env.RECORD_API_URL || "http://record-api:5001";
 
 async function createMessage(req, res) {
-  const { receiver_id, sender_id, content } = req.body;
+  const { userIdReceive, userIdSend, message } = req.body;
 
-  if (!sender_id || !content) {
+  if (!userIdSend || !message) {
     return res
       .status(400)
-      .json({ error: "sender_id (do token) e content são obrigatórios." });
+      .json({ error: "userIdSend (do token) e message são obrigatórios." });
   }
 
   try {
     const recordResponse = await axios.post(`${RECORD_API_URL}/message`, {
-      sender_id,
-      receiver_id,
-      content,
+      sender_id: userIdSend,
+      receiver_id: userIdReceive,
+      message: message,
     });
 
     if (recordResponse.status === 201) {
       if (redisClient.isOpen) {
         try {
           await redisClient.set(
-            `last_message_user:${sender_id}`,
+            `last_message_user:${userIdSend}`,
             JSON.stringify({
               message_id: recordResponse.data.message_id,
-              content,
+              message,
               timestamp: new Date().toISOString(),
             })
           );

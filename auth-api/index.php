@@ -91,39 +91,95 @@ switch ($path_info) {
         }
         break;
 
-    case '/auth/validate':
-        if ($request_method == 'GET') {
-            $headers = getallheaders();
-            $auth_header = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($headers['Authorization']) ? $headers['Authorization'] : null);
+    // case '/auth/validate':
+    //     if ($request_method == 'GET') {
+    //         $headers = getallheaders();
+    //         $auth_header = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($headers['Authorization']) ? $headers['Authorization'] : null);
 
-            if ($auth_header) {
-                list($type, $token) = explode(' ', $auth_header, 2);
-                if (strcasecmp($type, 'Bearer') == 0 && $token) {
-                    try {
-                        $decoded_token = json_decode(base64_decode($token), true);
+    //         if ($auth_header) {
+    //             list($type, $token) = explode(' ', $auth_header, 2);
+    //             if (strcasecmp($type, 'Bearer') == 0 && $token) {
+    //                 try {
+    //                     $decoded_token = json_decode(base64_decode($token), true);
+    //                     if ($decoded_token && isset($decoded_token['exp']) && $decoded_token['exp'] > time()) {
+    //                          echo json_encode(['message' => 'Token válido.', 'user' => $decoded_token]);
+    //                     } else {
+    //                         http_response_code(401);
+    //                         echo json_encode(['error' => 'Token inválido ou expirado.']);
+    //                     }
+    //                 } catch (Exception $e) {
+    //                     http_response_code(401);
+    //                     echo json_encode(['error' => 'Token malformado.']);
+    //                 }
+    //             } else {
+    //                 http_response_code(401);
+    //                 echo json_encode(['error' => 'Token malformado ou tipo de autorização incorreto.']);
+    //             }
+    //         } else {
+    //             http_response_code(401);
+    //             echo json_encode(['error' => 'Cabeçalho de autorização ausente.']);
+    //         }
+    //     } else {
+    //          http_response_code(405);
+    //          echo json_encode(['error' => 'Método não permitido para /auth/validate. Use GET.']);
+    //     }
+    //     break;
+
+    case '/auth/validate':
+    if ($request_method == 'GET') {
+        $headers = getallheaders();
+
+        $auth_header = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($headers['authorization']) ? $headers['authorization'] : null);
+
+        if ($auth_header) {
+            list($type, $token) = explode(' ', $auth_header, 2);
+            if (strcasecmp($type, 'Bearer') == 0 && $token) {
+                try {
+                    $token_parts = explode('.', $token);
+
+                    if (count($token_parts) === 3) {
+                        $payload_base64 = $token_parts[1]; // O payload é a segunda parte
+
+                        // Para decodificar Base64-URL Safe, precisamos substituir '-' por '+' e '_' por '/'
+                        // e adicionar padding se necessário.
+                        $payload_base64_decoded = str_replace(['-', '_'], ['+', '/'], $payload_base64);
+                        // Adiciona padding '='
+                        $padding = strlen($payload_base64_decoded) % 4;
+                        if ($padding) {
+                            $payload_base64_decoded .= str_repeat('=', 4 - $padding);
+                        }
+
+                        $decoded_token = json_decode(base64_decode($payload_base64_decoded), true);
+
                         if ($decoded_token && isset($decoded_token['exp']) && $decoded_token['exp'] > time()) {
-                             echo json_encode(['message' => 'Token válido.', 'user' => $decoded_token]);
+                            http_response_code(200);
+                            echo json_encode(['message' => 'Token válido.', 'user' => $decoded_token]);
                         } else {
                             http_response_code(401);
                             echo json_encode(['error' => 'Token inválido ou expirado.']);
                         }
-                    } catch (Exception $e) {
+                    } else {
                         http_response_code(401);
-                        echo json_encode(['error' => 'Token malformado.']);
+                        echo json_encode(['error' => 'Token JWT malformado (não possui 3 partes).']);
                     }
-                } else {
+                } catch (Exception $e) {
                     http_response_code(401);
-                    echo json_encode(['error' => 'Token malformado ou tipo de autorização incorreto.']);
+                    
+                    echo json_encode(['error' => 'Erro ao processar o token.']);
                 }
             } else {
                 http_response_code(401);
-                echo json_encode(['error' => 'Cabeçalho de autorização ausente.']);
+                echo json_encode(['error' => 'Token malformado ou tipo de autorização incorreto.']);
             }
         } else {
-             http_response_code(405);
-             echo json_encode(['error' => 'Método não permitido para /auth/validate. Use GET.']);
+            http_response_code(401);
+            echo json_encode(['error' => 'Cabeçalho de autorização ausente.']);
         }
-        break;
+    } else {
+        http_response_code(405);
+        echo json_encode(['error' => 'Método não permitido para /auth/validate. Use GET.']);
+    }
+    break;
 
     case '/health':
         $db_connected = false;
