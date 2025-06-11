@@ -55,7 +55,7 @@ class AuthController {
 
     public function validateAuth(): void {
         $headers = getallheaders();
-        $auth_header = $headers['authorization'] ?? null;
+        $auth_header = $headers['Authorization'] ?? null;
 
         if (!$auth_header || !preg_match('/Bearer\s(\S+)/', $auth_header, $matches)) {
             http_response_code(401);

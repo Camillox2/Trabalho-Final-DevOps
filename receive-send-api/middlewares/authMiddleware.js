@@ -14,9 +14,9 @@ async function authenticateToken(req, res, next) {
     const response = await axios.get(`${AUTH_API_URL}/auth/validate`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-
+    
     if (response.status === 200 && response.data.user) {
-      req.user = response.data.user;
+      // req.user = response.data.user;
       next();
     } else {
       res

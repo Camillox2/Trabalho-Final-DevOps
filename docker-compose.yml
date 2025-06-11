@@ -59,7 +59,7 @@ services:
     networks:
       - chat_network
     environment:
-      AUTH_API_URL: http://auth-api:3001
+      AUTH_API_URL: http://auth-api:3000
       RECORD_API_URL: http://record-api:5002
       REDIS_HOST: redis_cache
       REDIS_PORT: 6379
@@ -74,6 +74,8 @@ services:
       record-api:
         condition: service_healthy
       redis_cache:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -122,6 +124,20 @@ services:
       retries: 5
       start_period: 5s
     restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - chat_network
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   chat_network:

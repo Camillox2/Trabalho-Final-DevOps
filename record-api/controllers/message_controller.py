@@ -27,6 +27,7 @@ def record_message():
 @message_bp.route('/message', methods=['GET'])
 def get_messages():
     user_id = request.args.get('userId', type=int)
+    print(f"Parâmetro userId recebido: {user_id}")
     if not user_id:
         return jsonify({'error': 'Parâmetro userId é obrigatório.'}), 400
 
@@ -35,6 +36,8 @@ def get_messages():
     if error:
         logger.error(f"Erro no controller ao buscar mensagens: {error}")
         return jsonify({'error': error}), 500
+    
+    print(f"Mensagens encontradas: {messages}")
 
     messages_json = [msg.__dict__ for msg in messages]
 
