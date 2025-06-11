@@ -26,6 +26,7 @@ def record_message():
 
 @message_bp.route('/message', methods=['GET'])
 def get_messages():
+    print("get_messages chamado")
     user_id = request.args.get('userId', type=int)
     print(f"Parâmetro userId recebido: {user_id}")
     if not user_id:

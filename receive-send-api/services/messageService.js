@@ -68,7 +68,7 @@ async function createMessage(req, res) {
 }
 
 async function getMessages(req, res) {
-    const userId = req.params.userId;
+    const userId = req.query.userId;
 
     if (!userId) {
         return res.status(400).json({
@@ -80,7 +80,8 @@ async function getMessages(req, res) {
         const response = await axios.get(`${RECORD_API_URL}/message`, {
             params: { userId },
         });
-        res.status(response.status).json(response.data);
+        console.log("Mensagens recebidas da Record-API:", response);
+        return res.status(response.status).json(response.data);
     } catch (error) {
         console.error(
             "Erro ao consultar mensagens na Record-API:",
@@ -112,7 +113,7 @@ async function messagesWorker(req, res) {
         
         if (messagesRaw.length === 0) {
             console.log(`Nenhuma mensagem encontrada no canal ${channelKey} para transferência.`);
-            return { success: true, message: "Nenhuma mensagem para transferir." };
+            return res.status(200).json({ message: "Nenhuma mensagem para transferir." });
         }
 
         for (const msgRaw of messagesRaw) {
