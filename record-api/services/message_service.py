@@ -47,10 +47,9 @@ class MessageService:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute(
                     """
-                    SELECT id, sender_id, receiver_id, message, created_at
+                    SELECT id, sender_id, receiver_id, message
                     FROM messages
                     WHERE sender_id = %s OR receiver_id = %s
-                    ORDER BY created_at DESC;
                     """,
                     (user_id, user_id)
                 )
@@ -61,8 +60,7 @@ class MessageService:
                         id=msg['id'],
                         sender_id=msg['sender_id'],
                         receiver_id=msg['receiver_id'],
-                        message=msg['message'],
-                        created_at=msg['created_at']
+                        message=msg['message']
                     ) for msg in messages_data
                 ]
             

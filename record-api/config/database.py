@@ -54,8 +54,7 @@ def init_db():
                     id SERIAL PRIMARY KEY,
                     sender_id INTEGER NOT NULL,
                     receiver_id INTEGER,
-                    message TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    message TEXT NOT NULL
                 );
             """)
             conn.commit()

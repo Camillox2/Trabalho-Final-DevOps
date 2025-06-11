@@ -6,57 +6,38 @@ error_reporting(E_ALL);
 
 header("Content-Type: application/json");
 
-$db_host = getenv('DB_HOST') ?: 'postgres_db';
-$db_port = getenv('DB_PORT') ?: '5432';
-$db_name = getenv('DB_NAME') ?: 'chatdb';
-$db_user = getenv('DB_USER') ?: 'admin';
-$db_pass = getenv('DB_PASSWORD') ?: 'secret';
+require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/services/UserService.php';
+require_once __DIR__ . '/controllers/AuthController.php';
 
-$dsn = "pgsql:host={$db_host};port={$db_port};dbname={$db_name}";
-$pdo = null;
+$pdo = getPDOConnection();
 
-try {
-    $pdo = new PDO($dsn, $db_user, $db_pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    $pdo->exec("CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(50) UNIQUE NOT NULL,
-        password_hash VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )");
-
-} catch (PDOException $e) {
+if (!$pdo) {
     http_response_code(500);
-    echo json_encode(['error' => 'Erro de conexão com o banco de dados: ' . $e->getMessage()]);
+    echo json_encode(['error' => 'Erro crítico: Não foi possível conectar ao banco de dados.']);
+    exit;
+}
+
+if (!initDatabase($pdo)) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Erro crítico: Não foi possível inicializar o esquema do banco de dados.']);
     exit;
 }
 
 $request_method = $_SERVER["REQUEST_METHOD"];
-$path_info = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '/';
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); 
+
+$script_name = $_SERVER['SCRIPT_NAME'];
+$base_path = str_replace('index.php', '', $script_name);
+$path_info = str_replace($base_path, '/', $path);
+
+$userService = new UserService($pdo);
+$authController = new AuthController($userService);
 
 switch ($path_info) {
     case '/register':
         if ($request_method == 'POST') {
-            $data = json_decode(file_get_contents('php://input'), true);
-            if (!isset($data['username']) || !isset($data['password'])) {
-                http_response_code(400);
-                echo json_encode(['error' => 'Usuário e senha são obrigatórios.']);
-                exit;
-            }
-            $hashed_password = md5($data['password']);
-
-            try {
-                $stmt = $pdo->prepare("INSERT INTO users (username, password_hash) VALUES (:username, :password)");
-                $stmt->bindParam(':username', $data['username']);
-                $stmt->bindParam(':password', $hashed_password);
-                $stmt->execute();
-                http_response_code(201);
-                echo json_encode(['message' => 'Usuário registrado com sucesso!', 'user_id' => $pdo->lastInsertId()]);
-            } catch (PDOException $e) {
-                http_response_code(409);
-                echo json_encode(['error' => 'Erro ao registrar usuário: ' . $e->getMessage()]);
-            }
+            $authController->register();
         } else {
             http_response_code(405);
             echo json_encode(['error' => 'Método não permitido para /register. Use POST.']);
@@ -65,121 +46,21 @@ switch ($path_info) {
 
     case '/login':
         if ($request_method == 'POST') {
-            $data = json_decode(file_get_contents('php://input'), true);
-            if (!isset($data['username']) || !isset($data['password'])) {
-                http_response_code(400);
-                echo json_encode(['error' => 'Usuário e senha são obrigatórios.']);
-                exit;
-            }
-            $hashed_password_input = md5($data['password']);
-
-            $stmt = $pdo->prepare("SELECT id, username, password_hash FROM users WHERE username = :username");
-            $stmt->bindParam(':username', $data['username']);
-            $stmt->execute();
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($user && $user['password_hash'] === $hashed_password_input) {
-                $token = base64_encode(json_encode(['user_id' => $user['id'], 'username' => $user['username'], 'exp' => time() + 3600]));
-                echo json_encode(['message' => 'Login bem-sucedido!', 'token' => $token]);
-            } else {
-                http_response_code(401);
-                echo json_encode(['error' => 'Credenciais inválidas.']);
-            }
+            $authController->login();
         } else {
             http_response_code(405);
             echo json_encode(['error' => 'Método não permitido para /login. Use POST.']);
         }
         break;
 
-    // case '/auth/validate':
-    //     if ($request_method == 'GET') {
-    //         $headers = getallheaders();
-    //         $auth_header = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($headers['Authorization']) ? $headers['Authorization'] : null);
-
-    //         if ($auth_header) {
-    //             list($type, $token) = explode(' ', $auth_header, 2);
-    //             if (strcasecmp($type, 'Bearer') == 0 && $token) {
-    //                 try {
-    //                     $decoded_token = json_decode(base64_decode($token), true);
-    //                     if ($decoded_token && isset($decoded_token['exp']) && $decoded_token['exp'] > time()) {
-    //                          echo json_encode(['message' => 'Token válido.', 'user' => $decoded_token]);
-    //                     } else {
-    //                         http_response_code(401);
-    //                         echo json_encode(['error' => 'Token inválido ou expirado.']);
-    //                     }
-    //                 } catch (Exception $e) {
-    //                     http_response_code(401);
-    //                     echo json_encode(['error' => 'Token malformado.']);
-    //                 }
-    //             } else {
-    //                 http_response_code(401);
-    //                 echo json_encode(['error' => 'Token malformado ou tipo de autorização incorreto.']);
-    //             }
-    //         } else {
-    //             http_response_code(401);
-    //             echo json_encode(['error' => 'Cabeçalho de autorização ausente.']);
-    //         }
-    //     } else {
-    //          http_response_code(405);
-    //          echo json_encode(['error' => 'Método não permitido para /auth/validate. Use GET.']);
-    //     }
-    //     break;
-
     case '/auth/validate':
-    if ($request_method == 'GET') {
-        $headers = getallheaders();
-
-        $auth_header = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($headers['authorization']) ? $headers['authorization'] : null);
-
-        if ($auth_header) {
-            list($type, $token) = explode(' ', $auth_header, 2);
-            if (strcasecmp($type, 'Bearer') == 0 && $token) {
-                try {
-                    $token_parts = explode('.', $token);
-
-                    if (count($token_parts) === 3) {
-                        $payload_base64 = $token_parts[1]; // O payload é a segunda parte
-
-                        // Para decodificar Base64-URL Safe, precisamos substituir '-' por '+' e '_' por '/'
-                        // e adicionar padding se necessário.
-                        $payload_base64_decoded = str_replace(['-', '_'], ['+', '/'], $payload_base64);
-                        // Adiciona padding '='
-                        $padding = strlen($payload_base64_decoded) % 4;
-                        if ($padding) {
-                            $payload_base64_decoded .= str_repeat('=', 4 - $padding);
-                        }
-
-                        $decoded_token = json_decode(base64_decode($payload_base64_decoded), true);
-
-                        if ($decoded_token && isset($decoded_token['exp']) && $decoded_token['exp'] > time()) {
-                            http_response_code(200);
-                            echo json_encode(['message' => 'Token válido.', 'user' => $decoded_token]);
-                        } else {
-                            http_response_code(401);
-                            echo json_encode(['error' => 'Token inválido ou expirado.']);
-                        }
-                    } else {
-                        http_response_code(401);
-                        echo json_encode(['error' => 'Token JWT malformado (não possui 3 partes).']);
-                    }
-                } catch (Exception $e) {
-                    http_response_code(401);
-                    
-                    echo json_encode(['error' => 'Erro ao processar o token.']);
-                }
-            } else {
-                http_response_code(401);
-                echo json_encode(['error' => 'Token malformado ou tipo de autorização incorreto.']);
-            }
+        if ($request_method == 'GET') {
+            $authController->validateAuth();
         } else {
-            http_response_code(401);
-            echo json_encode(['error' => 'Cabeçalho de autorização ausente.']);
+            http_response_code(405);
+            echo json_encode(['error' => 'Método não permitido para /auth/validate. Use GET.']);
         }
-    } else {
-        http_response_code(405);
-        echo json_encode(['error' => 'Método não permitido para /auth/validate. Use GET.']);
-    }
-    break;
+        break;
 
     case '/health':
         $db_connected = false;
@@ -189,7 +70,7 @@ switch ($path_info) {
                 $pdo->query("SELECT 1");
                 $db_connected = true;
             } else {
-                $db_error_message = "PDO object was not initialized globally.";
+                $db_error_message = "Objeto PDO não foi inicializado.";
             }
         } catch (PDOException $e) {
             $db_connected = false;
@@ -208,5 +89,11 @@ switch ($path_info) {
             ]);
         }
         break;
+
+    default:
+        http_response_code(404);
+        echo json_encode(['error' => 'Rota não encontrada.']);
+        break;
 }
+
 ?>
