@@ -24,7 +24,7 @@ echo "Teste 3: Enviando mensagem do usuario 1 para o usuario 2"
 curl -s -X POST http://localhost:3002/messages \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{ "userIdSend": 1,"userIdReceive": 2,"message": "Ola, usuario 2! Como vai?" }'
+  -d '{ "sender_id": 1,"receiver_id": 2,"content": "Ola, usuario 2! Como vai?" }'
 
 echo ""
 echo "Teste 4: Consulta de mensagens do usuario 1"

@@ -5,8 +5,7 @@ const redisClient = require('../utils/redisClient');
 const RECORD_API_URL = process.env.RECORD_API_URL || "http://record-api:5001";
 
 async function createMessage(req, res) {
-  const { receiver_id, content } = req.body;
-  const sender_id = req.user.user_id;
+  const { receiver_id, sender_id, content } = req.body;
 
   if (!sender_id || !content) {
     return res
