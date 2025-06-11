@@ -3,7 +3,7 @@ const axios = require("axios");
 const redisClient = require('../utils/redisClient');
 const rabbitMQClient = require('../utils/rabbitmqClient');
 
-const RECORD_API_URL = process.env.RECORD_API_URL || "http://record-api:5001"; // Ainda usado por getMessages
+const RECORD_API_URL = process.env.RECORD_API_URL || "http://record-api:5001";
 
 async function createMessage(req, res) {
     const { userIdSend, userIdReceive, message } = req.body;
@@ -68,7 +68,8 @@ async function createMessage(req, res) {
 }
 
 async function getMessages(req, res) {
-    const userId = req.user ? req.user.user_id : null;
+    const userId = req.params.userId;
+
     if (!userId) {
         return res.status(400).json({
             error: "Não foi possível identificar o usuário para buscar mensagens.",
